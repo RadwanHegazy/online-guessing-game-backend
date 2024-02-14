@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from ..models import Battle, Help 
+from django.core.cache import cache
 
 class HelpTextSerializer (serializers.ModelSerializer) : 
     class Meta :
@@ -45,14 +46,20 @@ class BattleSerializer (serializers.ModelSerializer) :
             'id' : battle.id
         }
 
+        
+        battles = BattleSerializer(Battle.objects.all(),many=True)
+        cache.set('battles',battles.data,3600)
+
+
         return battle_id
     
     def handel_user (self, user) :
         
         if user is not None :
             return {
+                'id' : user.id,
                 'full_name' : user.full_name,
-                'picture' : user.picture.url
+                'picture' : user.picture.url,
             }
     
     def to_representation(self, instance):

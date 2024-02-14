@@ -1,5 +1,6 @@
 from channels.generic.websocket import WebsocketConsumer
 from game.models import Battle
+from django.core.cache import cache
 import threading, json
 
 class SearchBattleConsumer (WebsocketConsumer) : 
@@ -7,11 +8,13 @@ class SearchBattleConsumer (WebsocketConsumer) :
     def search_for_battle (self) : 
 
         while True : 
-            avaliable_battles = Battle.objects.filter(vs=None).exclude(created_by=self.user)
+            # avaliable_battles = Battle.objects.filter(vs=None).exclude(created_by=self.user)
+            cahced_battles = cache.get('battles')
+            avaliable_battles = [battle for battle in cahced_battles if battle.get('vs') == None and battle.get('created_by').get('id') != self.user.id]
             print('avaliable battles : ', avaliable_battles)
 
-            if avaliable_battles.count() > 0 :
-                avaliable_battle = avaliable_battles.first()
+            if len(avaliable_battles) > 0 :
+                avaliable_battle = Battle.objects.get(id=avaliable_battle[0].get('id'))
                 avaliable_battle.vs = self.user
                 avaliable_battle.save()
                 battle_id = avaliable_battle.id

@@ -1,7 +1,9 @@
-from typing import Collection, Iterable
+from django.core.cache import cache
 from django.db import models
 from users.models import User
 from uuid import uuid4
+from django.dispatch import receiver
+from django.db.models.signals import post_save, post_delete
 
 class Battle (models.Model) : 
     id = models.UUIDField(primary_key=True,db_index=True,editable=False,default=uuid4)
@@ -28,3 +30,11 @@ class Help (models.Model) :
 
     def __str__(self) : 
         return self.text
+
+
+from game.apis.serializers import BattleSerializer
+
+    
+@receiver(post_delete,sender=Battle)
+def DeleteCacheBattles (instance, **kwargs) :
+    cache.delete('battles')

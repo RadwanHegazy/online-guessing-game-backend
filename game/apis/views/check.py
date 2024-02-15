@@ -1,11 +1,11 @@
 from rest_framework import decorators, status, permissions
 from rest_framework.response import Response
-from game.apis.serializers import Battle, BattleSerializer
+from game.apis.serializers import Battle
 
 
-@decorators.api_view(["GET"])
+@decorators.api_view(["POST"])
 @decorators.permission_classes([permissions.IsAuthenticated])
-def GetBattleView (request, battle_id) :
+def CheckBattle (request, battle_id) :
     try : 
         
         try : 
@@ -16,20 +16,28 @@ def GetBattleView (request, battle_id) :
             },status=status.HTTP_404_NOT_FOUND)
         
         user = request.user
+        word = request.data.get('word',None)
 
-        if user != battle.created_by and user != battle.vs : 
+        if word is None : 
             return Response({
-                'message' : "you don't belong to this battle"
+                'message' : "insert word"
             },status=status.HTTP_400_BAD_REQUEST)
-        
-        if battle.created_by == None or battle.vs == None : 
-            return Response({
-                'message' : "battle not completed yet"
-            },status=status.HTTP_400_BAD_REQUEST)
-        
-        serializer = BattleSerializer(battle)
 
-        return Response(serializer.data,status=status.HTTP_200_OK)
+        if word == battle.word : 
+            battle.vs.points = battle.vs.points + 10
+            battle.vs.save()
+            return Response({
+                'message' : 'correct word'
+            },status=status.HTTP_200_OK)
+        
+        else:
+            battle.created_by.points = battle.created_by.points + 10
+            battle.created_by.save()
+            return Response({
+                'message' : 'wrong word'
+            },status=status.HTTP_200_OK)
+        
+
 
     except Exception as error : 
         return Response({

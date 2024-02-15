@@ -8,13 +8,11 @@ class SearchBattleConsumer (WebsocketConsumer) :
     def search_for_battle (self) : 
 
         while True : 
-            # avaliable_battles = Battle.objects.filter(vs=None).exclude(created_by=self.user)
-            cahced_battles = cache.get('battles')
-            avaliable_battles = [battle for battle in cahced_battles if battle.get('vs') == None and battle.get('created_by').get('id') != self.user.id]
-            print('avaliable battles : ', avaliable_battles)
+            avaliable_battles = Battle.objects.filter(vs=None).exclude(created_by=self.user)
+            
 
-            if len(avaliable_battles) > 0 :
-                avaliable_battle = Battle.objects.get(id=avaliable_battle[0].get('id'))
+            if avaliable_battles.count() > 0 :
+                avaliable_battle = avaliable_battles[0]
                 avaliable_battle.vs = self.user
                 avaliable_battle.save()
                 battle_id = avaliable_battle.id

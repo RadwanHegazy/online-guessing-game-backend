@@ -24,34 +24,34 @@ class BattleSerializer (serializers.ModelSerializer) :
 
         return attrs
 
-    def save(self, **kwargs):
-        help_text_list = self.validated_data['help_text']
+    # def save(self, **kwargs):
+    #     help_text_list = self.validated_data['help_text']
         
-        battle = Battle.objects.create(
-            created_by = self.validated_data['created_by'],
-            word = self.validated_data['word'],
-        )
+    #     battle = Battle.objects.create(
+    #         created_by = self.validated_data['created_by'],
+    #         word = self.validated_data['word'],
+    #     )
 
-        for i in help_text_list : 
-            help_text_model = Help.objects.create(
-                text = i['text']
-            )
+    #     for i in help_text_list : 
+    #         help_text_model = Help.objects.create(
+    #             text = i['text']
+    #         )
 
-            help_text_model.save()
+    #         help_text_model.save()
 
-            battle.help_text.add(help_text_model)
-            battle.save()
+    #         battle.help_text.add(help_text_model)
+    #         battle.save()
         
-        battle_id = {
-            'id' : battle.id
-        }
+    #     battle_id = {
+    #         'id' : battle.id
+    #     }
 
         
-        battles = BattleSerializer(Battle.objects.all(),many=True)
-        cache.set('battles',battles.data,3600)
+    #     battles = BattleSerializer(Battle.objects.all(),many=True)
+    #     cache.set('battles',battles.data,3600)
 
 
-        return battle_id
+    #     return battle_id
     
     def handel_user (self, user) :
         
